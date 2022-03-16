@@ -1,4 +1,4 @@
-import { ObjectType, InputType, Field } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
 import { CoreEntity } from 'src/core/entities/core.entity';
 import { User } from '@prisma/client';
 

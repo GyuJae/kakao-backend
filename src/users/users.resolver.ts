@@ -9,6 +9,12 @@ import {
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import {
+  SearchFriendsInput,
+  SearchFriendsOutput,
+} from './dtos/search-friends.dto';
+import { SeeFriendsOutput } from './dtos/see-friends.dto';
+import { SeeMaybeFriendsOutput } from './dtos/see-maybe-friends.dto';
+import {
   ToggleFriendInput,
   ToggleFriendOutput,
 } from './dtos/toggle-friend.dto';
@@ -23,6 +29,30 @@ export class UsersResolver {
   @Query(() => UserEntity)
   async whoAmI(@CurrentUser() currentUesr: UserEntity): Promise<UserEntity> {
     return currentUesr;
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => SeeFriendsOutput)
+  async seeFriends(
+    @CurrentUser() currentUser: UserEntity,
+  ): Promise<SeeFriendsOutput> {
+    return this.userService.seeFriends(currentUser);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => SeeMaybeFriendsOutput)
+  async seeMaybeFriends(
+    @CurrentUser() currentUser: UserEntity,
+  ): Promise<SeeMaybeFriendsOutput> {
+    return this.userService.seeMaybeFriends(currentUser);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => SearchFriendsOutput)
+  async searchFriends(
+    @Args('input') searchFriendsInput: SearchFriendsInput,
+  ): Promise<SearchFriendsOutput> {
+    return this.userService.searchFriends(searchFriendsInput);
   }
 
   @Mutation(() => CreateAccountOutput)

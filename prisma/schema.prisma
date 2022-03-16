@@ -25,7 +25,7 @@ model User {
   rooms         Room[]
   messages      Message[]
   myFriends     Friend[]  @relation(name: "me")
-  FriendToMe    Friend[]  @relation(name: "friend")
+  friendToMe    Friend[]  @relation(name: "friend")
 }
 
 model Friend {

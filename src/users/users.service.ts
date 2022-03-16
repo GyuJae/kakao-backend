@@ -13,6 +13,12 @@ import {
   ToggleFriendInput,
   ToggleFriendOutput,
 } from './dtos/toggle-friend.dto';
+import { SeeFriendsOutput } from './dtos/see-friends.dto';
+import { SeeMaybeFriendsOutput } from './dtos/see-maybe-friends.dto';
+import {
+  SearchFriendsInput,
+  SearchFriendsOutput,
+} from './dtos/search-friends.dto';
 
 @Injectable()
 export class UsersService {
@@ -166,6 +172,104 @@ export class UsersService {
       return {
         ok: false,
         error: error.message,
+      };
+    }
+  }
+
+  async seeFriends(currentUser: UserEntity): Promise<SeeFriendsOutput> {
+    try {
+      const { myFriends } = await this.prismaService.user.findUnique({
+        where: {
+          id: currentUser.id,
+        },
+        include: {
+          myFriends: {
+            include: {
+              friend: true,
+            },
+          },
+        },
+      });
+      const friends = myFriends.map((friend) => friend.friend);
+      return {
+        ok: true,
+        error: null,
+        friends,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+        friends: null,
+      };
+    }
+  }
+
+  async seeMaybeFriends(
+    currentUser: UserEntity,
+  ): Promise<SeeMaybeFriendsOutput> {
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: {
+          id: currentUser.id,
+        },
+        include: {
+          myFriends: true,
+          friendToMe: true,
+        },
+      });
+
+      const maybeFriends = user.friendToMe.filter(
+        (friend) => !user.myFriends.includes(friend),
+      );
+
+      const friends = await this.prismaService.friend.findMany({
+        where: {
+          OR: maybeFriends,
+        },
+        include: {
+          me: true,
+        },
+      });
+
+      return {
+        ok: true,
+        error: null,
+        friends: friends.map((f) => f.me),
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+        friends: null,
+      };
+    }
+  }
+
+  async searchFriends({
+    keyword,
+  }: SearchFriendsInput): Promise<SearchFriendsOutput> {
+    try {
+      if (keyword.length <= 1) {
+        throw new Error('Keyword must longer than 1');
+      }
+      const users = await this.prismaService.user.findMany({
+        where: {
+          name: {
+            contains: keyword,
+          },
+        },
+      });
+      return {
+        ok: true,
+        error: null,
+        users,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+        users: null,
       };
     }
   }

@@ -4,5 +4,9 @@
 - login [x]
 - auth decorator [x]
 - edit profile [x]
-- toggle friend []
-- show frien []
+- toggle friend [x]
+- see friends [x]
+- see maybe friends [x]
+- search friends [x]
+
+## Message && Room
