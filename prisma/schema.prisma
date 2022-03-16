@@ -24,6 +24,20 @@ model User {
   bgImg         String?
   rooms         Room[]
   messages      Message[]
+  myFriends     Friend[]  @relation(name: "me")
+  FriendToMe    Friend[]  @relation(name: "friend")
+}
+
+model Friend {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  me        User     @relation(name: "me", fields: [meId], references: [id])
+  meId      Int
+  friend    User     @relation(name: "friend", fields: [friendId], references: [id])
+  friendId  Int
+
+  @@unique([meId, friendId])
 }
 
 model Room {

@@ -9,6 +9,10 @@ import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { UserEntity } from './entities/user.entity';
+import {
+  ToggleFriendInput,
+  ToggleFriendOutput,
+} from './dtos/toggle-friend.dto';
 
 @Injectable()
 export class UsersService {
@@ -101,6 +105,59 @@ export class UsersService {
           ...editProfileInput,
         },
       });
+      return {
+        ok: true,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+      };
+    }
+  }
+
+  async toggleFirend(
+    { friendId }: ToggleFriendInput,
+    currentUser: UserEntity,
+  ): Promise<ToggleFriendOutput> {
+    try {
+      if (friendId === currentUser.id) {
+        throw new Error('This id mine');
+      }
+      const targetUser = await this.prismaService.user.findUnique({
+        where: {
+          id: friendId,
+        },
+        select: {
+          id: true,
+        },
+      });
+      if (!targetUser) {
+        throw new Error('This id does not exist');
+      }
+      const existFriend = await this.prismaService.friend.findUnique({
+        where: {
+          meId_friendId: {
+            meId: currentUser.id,
+            friendId: targetUser.id,
+          },
+        },
+      });
+      if (existFriend) {
+        await this.prismaService.friend.delete({
+          where: {
+            id: existFriend.id,
+          },
+        });
+      } else {
+        await this.prismaService.friend.create({
+          data: {
+            meId: currentUser.id,
+            friendId: targetUser.id,
+          },
+        });
+      }
       return {
         ok: true,
         error: null,

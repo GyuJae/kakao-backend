@@ -3,7 +3,6 @@ import { CoreEntity } from 'src/core/entities/core.entity';
 import { User } from '@prisma/client';
 
 @ObjectType()
-@InputType()
 export class UserEntity extends CoreEntity implements User {
   @Field(() => String)
   email: string;

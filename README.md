@@ -1,6 +1,8 @@
 ## User
 
-- create account
-- login
-- auth decorator
-- edit profile
+- create account [x]
+- login [x]
+- auth decorator [x]
+- edit profile [x]
+- toggle friend []
+- show frien []

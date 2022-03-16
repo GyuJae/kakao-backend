@@ -8,6 +8,10 @@ import {
 } from './dtos/create-account.dto';
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
+import {
+  ToggleFriendInput,
+  ToggleFriendOutput,
+} from './dtos/toggle-friend.dto';
 import { UserEntity } from './entities/user.entity';
 import { UsersService } from './users.service';
 
@@ -15,9 +19,10 @@ import { UsersService } from './users.service';
 export class UsersResolver {
   constructor(private userService: UsersService) {}
 
-  @Query(() => Boolean)
-  async whoAmI(): Promise<boolean> {
-    return true;
+  @UseGuards(GqlAuthGuard)
+  @Query(() => UserEntity)
+  async whoAmI(@CurrentUser() currentUesr: UserEntity): Promise<UserEntity> {
+    return currentUesr;
   }
 
   @Mutation(() => CreateAccountOutput)
@@ -39,5 +44,14 @@ export class UsersResolver {
     @CurrentUser() currentUser: UserEntity,
   ): Promise<EditProfileOutput> {
     return this.userService.editProfile(editProfileInput, currentUser);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => ToggleFriendOutput)
+  async toggleFriend(
+    @Args('input') toggleFriendInput: ToggleFriendInput,
+    @CurrentUser() currentUser: UserEntity,
+  ): Promise<ToggleFriendOutput> {
+    return this.userService.toggleFirend(toggleFriendInput, currentUser);
   }
 }
