@@ -2,11 +2,45 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { CreateRoomInput, CreateRoomOutput } from './dtos/create-room.dto';
+import {
+  ReadMessagesInput,
+  ReadMessagesOutput,
+} from './dtos/read-messages.dto';
 import { SendMessageInput, SendMessageOutput } from './dtos/send-message.dto';
 
 @Injectable()
 export class MessagesService {
   constructor(private prismaService: PrismaService) {}
+
+  async readMessages(
+    { roomId }: ReadMessagesInput,
+    currentUser: UserEntity,
+  ): Promise<ReadMessagesOutput> {
+    try {
+      const room = await this.prismaService.room.findUnique({
+        where: {
+          id: roomId,
+        },
+        include: {
+          users: {
+            select: { id: true },
+          },
+        },
+      });
+      if (!room) {
+        throw new Error('This room id does not exists.');
+      }
+      if (!room.users.map((user) => user.id).includes(currentUser.id)) {
+        throw new Error('No authorization');
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+        messages: null,
+      };
+    }
+  }
 
   async createRoom(
     { userIds }: CreateRoomInput,
@@ -71,6 +105,7 @@ export class MessagesService {
           roomId: room.id,
           userId: currentUser.id,
           payload,
+          isReadedCount: room.users.length - 1,
         },
       });
       return {

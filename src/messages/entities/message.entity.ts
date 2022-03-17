@@ -7,6 +7,9 @@ export class RoomEntity extends CoreEntity implements Room {}
 
 @ObjectType()
 export class MessageEntity extends CoreEntity implements Message {
+  @Field(() => Int)
+  isReadedCount: number;
+
   @Field(() => String)
   payload: string;
 

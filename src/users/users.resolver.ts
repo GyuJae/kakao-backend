@@ -1,7 +1,5 @@
-import { UseGuards } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { CurrentUser } from 'src/auth/auth.decorator';
-import { GqlAuthGuard } from 'src/auth/auth.guard';
+import { CurrentUser, Roles } from 'src/auth/auth.decorator';
 import {
   CreateAccountInput,
   CreateAccountOutput,
@@ -25,13 +23,13 @@ import { UsersService } from './users.service';
 export class UsersResolver {
   constructor(private userService: UsersService) {}
 
-  @UseGuards(GqlAuthGuard)
+  @Roles('USER')
   @Query(() => UserEntity)
   async whoAmI(@CurrentUser() currentUesr: UserEntity): Promise<UserEntity> {
     return currentUesr;
   }
 
-  @UseGuards(GqlAuthGuard)
+  @Roles('USER')
   @Query(() => SeeFriendsOutput)
   async seeFriends(
     @CurrentUser() currentUser: UserEntity,
@@ -39,7 +37,7 @@ export class UsersResolver {
     return this.userService.seeFriends(currentUser);
   }
 
-  @UseGuards(GqlAuthGuard)
+  @Roles('USER')
   @Query(() => SeeMaybeFriendsOutput)
   async seeMaybeFriends(
     @CurrentUser() currentUser: UserEntity,
@@ -47,7 +45,7 @@ export class UsersResolver {
     return this.userService.seeMaybeFriends(currentUser);
   }
 
-  @UseGuards(GqlAuthGuard)
+  @Roles('USER')
   @Query(() => SearchFriendsOutput)
   async searchFriends(
     @Args('input') searchFriendsInput: SearchFriendsInput,
@@ -67,7 +65,7 @@ export class UsersResolver {
     return this.userService.login(loginInput);
   }
 
-  @UseGuards(GqlAuthGuard)
+  @Roles('USER')
   @Mutation(() => EditProfileOutput)
   async editProfile(
     @Args('input') editProfileInput: EditProfileInput,
@@ -76,7 +74,7 @@ export class UsersResolver {
     return this.userService.editProfile(editProfileInput, currentUser);
   }
 
-  @UseGuards(GqlAuthGuard)
+  @Roles('USER')
   @Mutation(() => ToggleFriendOutput)
   async toggleFriend(
     @Args('input') toggleFriendInput: ToggleFriendInput,

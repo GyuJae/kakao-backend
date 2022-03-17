@@ -22,10 +22,17 @@ model User {
   avatar        String?
   statusMessage String?
   bgImg         String?
+  role          Role      @default(USER)
   rooms         Room[]
   messages      Message[]
   myFriends     Friend[]  @relation(name: "me")
   friendToMe    Friend[]  @relation(name: "friend")
+
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 model Friend {
@@ -49,11 +56,12 @@ model Room {
 }
 
 model Message {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  payload   String
-  room      Room     @relation(fields: [roomId], references: [id])
-  roomId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  payload       String
+  isReadedCount Int
+  room          Room     @relation(fields: [roomId], references: [id])
+  roomId        Int
+  user          User     @relation(fields: [userId], references: [id])
+  userId        Int
 }
