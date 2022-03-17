@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { PubSub } from 'graphql-subscriptions';
+import { NEW_MESSAGE, PUB_SUB } from 'src/core/pubsub.constant';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { CreateRoomInput, CreateRoomOutput } from './dtos/create-room.dto';
@@ -10,7 +12,10 @@ import { SendMessageInput, SendMessageOutput } from './dtos/send-message.dto';
 
 @Injectable()
 export class MessagesService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    @Inject(PUB_SUB) private pubSub: PubSub,
+  ) {}
 
   async readMessages(
     { roomId }: ReadMessagesInput,
@@ -100,14 +105,18 @@ export class MessagesService {
       if (!room.users.map((user) => user.id).includes(currentUser.id)) {
         throw new Error('No Authorization');
       }
-      await this.prismaService.message.create({
+      const newMessage = await this.prismaService.message.create({
         data: {
           roomId: room.id,
           userId: currentUser.id,
           payload,
           isReadedCount: room.users.length - 1,
         },
+        include: {
+          user: true,
+        },
       });
+      await this.pubSub.publish(NEW_MESSAGE, { takeMessage: newMessage });
       return {
         ok: true,
         error: null,

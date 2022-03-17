@@ -1,5 +1,9 @@
 import { Global, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { PubSub } from 'graphql-subscriptions';
+import { PUB_SUB } from './pubsub.constant';
+
+const pubsub = new PubSub();
 
 @Global()
 @Module({
@@ -11,6 +15,12 @@ import { JwtModule } from '@nestjs/jwt';
       },
     }),
   ],
-  exports: [JwtModule],
+  providers: [
+    {
+      provide: PUB_SUB,
+      useValue: pubsub,
+    },
+  ],
+  exports: [JwtModule, PUB_SUB],
 })
 export class CoreModule {}

@@ -12,17 +12,17 @@ import { MessagesModule } from './messages/messages.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
-      // subscriptions: {
-      //   'subscriptions-transport-ws': {
-      //     path: '/graphql',
-      //     onConnect: (connectionParams) => {
-      //       if (connectionParams.hasOwnProperty('x-jwt')) {
-      //         return { token: connectionParams['x-jwt'] };
-      //       }
-      //       return {};
-      //     },
-      //   },
-      // },
+      subscriptions: {
+        'subscriptions-transport-ws': {
+          path: '/graphql',
+          onConnect: (connectionParams) => {
+            if (connectionParams.hasOwnProperty('x-jwt')) {
+              return { token: connectionParams['x-jwt'] };
+            }
+            return {};
+          },
+        },
+      },
     }),
     UsersModule,
     CoreModule,
