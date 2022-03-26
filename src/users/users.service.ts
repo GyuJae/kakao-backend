@@ -10,15 +10,19 @@ import { AuthService } from 'src/auth/auth.service';
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { UserEntity } from './entities/user.entity';
 import {
-  ToggleFriendInput,
-  ToggleFriendOutput,
-} from './dtos/toggle-friend.dto';
+  CreateFriendsInput,
+  CreateFriendsOutput,
+} from './dtos/create-friends.dto';
 import { SeeFriendsOutput } from './dtos/see-friends.dto';
 import { SeeMaybeFriendsOutput } from './dtos/see-maybe-friends.dto';
 import {
   SearchFriendsInput,
   SearchFriendsOutput,
 } from './dtos/search-friends.dto';
+import {
+  DeleteFriendInput,
+  DeleteFriendOutput,
+} from './dtos/delete-friend.dto';
 
 @Injectable()
 export class UsersService {
@@ -123,47 +127,36 @@ export class UsersService {
     }
   }
 
-  async toggleFirend(
-    { friendId }: ToggleFriendInput,
+  async createFriends(
+    { friendIds }: CreateFriendsInput,
     currentUser: UserEntity,
-  ): Promise<ToggleFriendOutput> {
+  ): Promise<CreateFriendsOutput> {
     try {
-      if (friendId === currentUser.id) {
+      if (friendIds.includes(currentUser.id)) {
         throw new Error('This id mine');
       }
-      const targetUser = await this.prismaService.user.findUnique({
-        where: {
-          id: friendId,
-        },
-        select: {
-          id: true,
-        },
-      });
-      if (!targetUser) {
-        throw new Error('This id does not exist');
-      }
-      const existFriend = await this.prismaService.friend.findUnique({
-        where: {
-          meId_friendId: {
-            meId: currentUser.id,
-            friendId: targetUser.id,
-          },
-        },
-      });
-      if (existFriend) {
-        await this.prismaService.friend.delete({
+
+      for (const friend of friendIds) {
+        const user = await this.prismaService.user.findUnique({
           where: {
-            id: existFriend.id,
+            id: friend,
+          },
+          select: {
+            id: true,
           },
         });
-      } else {
-        await this.prismaService.friend.create({
-          data: {
-            meId: currentUser.id,
-            friendId: targetUser.id,
-          },
-        });
+        if (!user) {
+          throw new Error('this id not user');
+        }
       }
+
+      await this.prismaService.friend.createMany({
+        data: friendIds.map((friend) => ({
+          meId: currentUser.id,
+          friendId: friend,
+        })),
+        skipDuplicates: true,
+      });
       return {
         ok: true,
         error: null,
@@ -296,6 +289,42 @@ export class UsersService {
       return friend ? true : false;
     } catch {
       return false;
+    }
+  }
+
+  async deleteFriend(
+    { friendId }: DeleteFriendInput,
+    currentUser: UserEntity,
+  ): Promise<DeleteFriendOutput> {
+    try {
+      const friend = await this.prismaService.friend.findUnique({
+        where: {
+          meId_friendId: {
+            meId: currentUser.id,
+            friendId: friendId,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+      if (!friend) {
+        throw new Error('This id does not exist');
+      }
+      await this.prismaService.friend.delete({
+        where: {
+          id: friend.id,
+        },
+      });
+      return {
+        ok: true,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+      };
     }
   }
 }

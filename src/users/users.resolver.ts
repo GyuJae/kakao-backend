@@ -12,6 +12,10 @@ import {
   CreateAccountOutput,
 } from './dtos/create-account.dto';
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
+import {
+  DeleteFriendInput,
+  DeleteFriendOutput,
+} from './dtos/delete-friend.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import {
   SearchFriendsInput,
@@ -20,9 +24,9 @@ import {
 import { SeeFriendsOutput } from './dtos/see-friends.dto';
 import { SeeMaybeFriendsOutput } from './dtos/see-maybe-friends.dto';
 import {
-  ToggleFriendInput,
-  ToggleFriendOutput,
-} from './dtos/toggle-friend.dto';
+  CreateFriendsInput,
+  CreateFriendsOutput,
+} from './dtos/create-friends.dto';
 import { UserEntity } from './entities/user.entity';
 import { UsersService } from './users.service';
 
@@ -100,11 +104,20 @@ export class UsersResolver {
   }
 
   @Roles('USER')
-  @Mutation(() => ToggleFriendOutput)
-  async toggleFriend(
-    @Args('input') toggleFriendInput: ToggleFriendInput,
+  @Mutation(() => CreateFriendsOutput)
+  async createFriends(
+    @Args('input') createFriendInput: CreateFriendsInput,
     @CurrentUser() currentUser: UserEntity,
-  ): Promise<ToggleFriendOutput> {
-    return this.userService.toggleFirend(toggleFriendInput, currentUser);
+  ): Promise<CreateFriendsOutput> {
+    return this.userService.createFriends(createFriendInput, currentUser);
+  }
+
+  @Roles('USER')
+  @Mutation(() => DeleteFriendOutput)
+  async deleteFriend(
+    @Args('input') deleteFriendInput: DeleteFriendInput,
+    @CurrentUser() user: UserEntity,
+  ): Promise<DeleteFriendOutput> {
+    return this.userService.deleteFriend(deleteFriendInput, user);
   }
 }
