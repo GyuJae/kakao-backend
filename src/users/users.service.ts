@@ -273,4 +273,29 @@ export class UsersService {
       };
     }
   }
+
+  async isMyFriend({
+    user,
+    currentUser,
+  }: {
+    user: UserEntity;
+    currentUser: UserEntity;
+  }): Promise<boolean> {
+    try {
+      const friend = await this.prismaService.friend.findUnique({
+        where: {
+          meId_friendId: {
+            meId: currentUser.id,
+            friendId: user.id,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+      return friend ? true : false;
+    } catch {
+      return false;
+    }
+  }
 }

@@ -1,4 +1,11 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { CurrentUser, Roles } from 'src/auth/auth.decorator';
 import {
   CreateAccountInput,
@@ -22,6 +29,24 @@ import { UsersService } from './users.service';
 @Resolver(() => UserEntity)
 export class UsersResolver {
   constructor(private userService: UsersService) {}
+
+  @ResolveField(() => Boolean)
+  @Roles('Any')
+  async isMe(
+    @Parent() user: UserEntity,
+    @CurrentUser() currentUser: UserEntity,
+  ): Promise<boolean> {
+    return user.id === currentUser.id;
+  }
+
+  @ResolveField(() => Boolean)
+  @Roles('USER')
+  async isMyFriend(
+    @Parent() user: UserEntity,
+    @CurrentUser() currentUser: UserEntity,
+  ): Promise<boolean> {
+    return this.userService.isMyFriend({ user, currentUser });
+  }
 
   @Roles('USER')
   @Query(() => UserEntity)
