@@ -8,6 +8,7 @@ import {
   ReadMessagesInput,
   ReadMessagesOutput,
 } from './dtos/read-messages.dto';
+import { ReadRoomsOutput } from './dtos/read-rooms.dto';
 import { SendMessageInput, SendMessageOutput } from './dtos/send-message.dto';
 
 @Injectable()
@@ -43,6 +44,34 @@ export class MessagesService {
         ok: false,
         error: error.message,
         messages: null,
+      };
+    }
+  }
+
+  async readRooms(currentUser: UserEntity): Promise<ReadRoomsOutput> {
+    try {
+      const rooms = await this.prismaService.room.findMany({
+        where: {
+          users: {
+            some: {
+              id: currentUser.id,
+            },
+          },
+        },
+        include: {
+          users: true,
+        },
+      });
+      return {
+        ok: true,
+        error: null,
+        rooms,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+        rooms: null,
       };
     }
   }

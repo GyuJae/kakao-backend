@@ -1,10 +1,11 @@
 import { Inject } from '@nestjs/common';
-import { Args, Mutation, Resolver, Subscription } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { CurrentUser, Roles } from 'src/auth/auth.decorator';
 import { NEW_MESSAGE, PUB_SUB } from 'src/core/pubsub.constant';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { CreateRoomInput, CreateRoomOutput } from './dtos/create-room.dto';
+import { ReadRoomsOutput } from './dtos/read-rooms.dto';
 import { SendMessageInput, SendMessageOutput } from './dtos/send-message.dto';
 import { TakeMessageInput, TakeMessageOutput } from './dtos/take-message.dto';
 import { MessagesService } from './messages.service';
@@ -15,6 +16,14 @@ export class MessagesResolver {
     private messageService: MessagesService,
     @Inject(PUB_SUB) private pubSub: PubSub,
   ) {}
+
+  @Roles('USER')
+  @Query(() => ReadRoomsOutput)
+  async readRooms(
+    @CurrentUser() currentUser: UserEntity,
+  ): Promise<ReadRoomsOutput> {
+    return this.messageService.readRooms(currentUser);
+  }
 
   @Roles('USER')
   @Mutation(() => CreateRoomOutput)
