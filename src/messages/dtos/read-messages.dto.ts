@@ -9,7 +9,25 @@ export class ReadMessagesInput {
 }
 
 @ObjectType()
+class MessageUser {
+  @Field(() => Int)
+  id: number;
+
+  @Field(() => String)
+  name: string;
+
+  @Field(() => String, { nullable: true })
+  avatar: string | null;
+}
+
+@ObjectType()
+class MessageWithUser extends MessageEntity {
+  @Field(() => MessageUser)
+  user: MessageUser;
+}
+
+@ObjectType()
 export class ReadMessagesOutput extends CoreOutput {
-  @Field(() => [MessageEntity], { nullable: true })
-  messages: MessageEntity[] | null;
+  @Field(() => [MessageWithUser], { nullable: true })
+  messages: MessageWithUser[] | null;
 }

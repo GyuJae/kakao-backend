@@ -31,6 +31,17 @@ export class MessagesService {
           users: {
             select: { id: true },
           },
+          messages: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
         },
       });
       if (!room) {
@@ -39,6 +50,11 @@ export class MessagesService {
       if (!room.users.map((user) => user.id).includes(currentUser.id)) {
         throw new Error('No authorization');
       }
+      return {
+        ok: true,
+        error: null,
+        messages: room.messages,
+      };
     } catch (error) {
       return {
         ok: false,
@@ -60,6 +76,12 @@ export class MessagesService {
         },
         include: {
           users: true,
+          messages: {
+            orderBy: {
+              createdAt: 'desc',
+            },
+            take: 1,
+          },
         },
       });
       return {

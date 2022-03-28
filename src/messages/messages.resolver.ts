@@ -5,6 +5,10 @@ import { CurrentUser, Roles } from 'src/auth/auth.decorator';
 import { NEW_MESSAGE, PUB_SUB } from 'src/core/pubsub.constant';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { CreateRoomInput, CreateRoomOutput } from './dtos/create-room.dto';
+import {
+  ReadMessagesInput,
+  ReadMessagesOutput,
+} from './dtos/read-messages.dto';
 import { ReadRoomsOutput } from './dtos/read-rooms.dto';
 import { SendMessageInput, SendMessageOutput } from './dtos/send-message.dto';
 import { TakeMessageInput, TakeMessageOutput } from './dtos/take-message.dto';
@@ -23,6 +27,15 @@ export class MessagesResolver {
     @CurrentUser() currentUser: UserEntity,
   ): Promise<ReadRoomsOutput> {
     return this.messageService.readRooms(currentUser);
+  }
+
+  @Roles('USER')
+  @Query(() => ReadMessagesOutput)
+  async readMessages(
+    @Args('input') readMessagesInput: ReadMessagesInput,
+    @CurrentUser() currentUser: UserEntity,
+  ): Promise<ReadMessagesOutput> {
+    return this.messageService.readMessages(readMessagesInput, currentUser);
   }
 
   @Roles('USER')

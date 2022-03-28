@@ -6,7 +6,13 @@ import { CoreEntity } from 'src/core/entities/core.entity';
 export class RoomEntity extends CoreEntity implements Room {}
 
 @ObjectType()
-export class MessageEntity extends CoreEntity implements Message {
+export class MessageEntity implements Message {
+  @Field(() => Int)
+  id: number;
+
+  @Field(() => Date)
+  createdAt: Date;
+
   @Field(() => Int)
   isReadedCount: number;
 
